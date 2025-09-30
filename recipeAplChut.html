@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Resizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+    .submit {
+      background: #22c55e;
+    }
+    .reset {
+      background: #9ca3af;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    #recipe-desc {
+      white-space: pre-line;
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="recipe-name"></h1>
+    <p id="recipe-desc"></p>
+
+    <h2>Ingredients</h2>
+    <ul id="ingredient-list"></ul>
+
+    <div>
+      <label for="inputQty">Adjust first ingredient quantity below (number only)</label>
+      <input type="number" id="inputQty" inputmode="numeric" step="any" />
+    </div>
+
+    <div class="controls">
+      <button class="submit" onclick="handleSubmit()">Submit</button>
+      <button class="reset" onclick="handleReset()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const defaultRecipe = {
+      name: "Indian Apple Chutney",
+      description: `Peel and core apples and cut into small pieces.
+      Mix Ginger/Garlic/Chili with vinegar.
+      Place all ingredients together and cook till apples and sultanas are soft.
+
+      Cook the chutney long and slow so it gets dark and deliciously gooey, to get that that distinctive sweet sour taste.
+
+      Best to put apples at bottom then sultanas with sugar on top. That way apples heat up providing more liquid to dissolve the sugar. If dry sugar is at the bottom it can caramelise (burn).
+
+      Seal in bottles rinsed in Sodium Metabisulphite solution (1 teaspoon per 568 ml water).`,
+      ingredients: [
+        { name: "peeled and cored cooking Apples", quantity: 2.4, unit: "Kg" },
+        { name: "Sugar", quantity: 0.96, unit: "Kg" },
+        { name: "Ginger (powder or root)", quantity: 38, unit: "g" },
+        { name: "Garlic", quantity: 75, unit: "g" },
+        { name: "Chili", quantity: 75, unit: "g" },
+        { name: "Sultanas", quantity: 0.730, unit: "Kg" },
+        { name: "Malt Vinegar", quantity: 0.73, unit: "L" },
+      ],
+    };
+
+    let recipe = JSON.parse(JSON.stringify(defaultRecipe));
+
+    function renderRecipe() {
+      document.getElementById("recipe-name").textContent = defaultRecipe.name;
+      document.getElementById("recipe-desc").textContent = defaultRecipe.description;
+      renderIngredients();
+    }
+
+    function renderIngredients() {
+      const list = document.getElementById("ingredient-list");
+      list.innerHTML = "";
+      recipe.ingredients.forEach(ing => {
+        const li = document.createElement("li");
+        li.textContent = `${ing.name}: ${ing.quantity} ${ing.unit}`;
+        list.appendChild(li);
+      });
+    }
+
+    function handleSubmit() {
+      const input = document.getElementById("inputQty").value;
+      if (!input || isNaN(input)) return;
+
+      const originalFirst = defaultRecipe.ingredients[0].quantity;
+      const factor = parseFloat(input) / originalFirst;
+
+      recipe.ingredients = defaultRecipe.ingredients.map((ing, idx) => {
+        if (idx === 0) return { ...ing, quantity: parseFloat(input) };
+        return {
+          ...ing,
+          quantity: +(ing.quantity * factor).toFixed(2)
+        };
+      });
+      renderIngredients();
+    }
+
+    function handleReset() {
+      recipe = JSON.parse(JSON.stringify(defaultRecipe));
+      document.getElementById("inputQty").value = "";
+      renderIngredients();
+    }
+
+    // Initial render
+    renderRecipe();
+  </script>
+</body>
+</html>
